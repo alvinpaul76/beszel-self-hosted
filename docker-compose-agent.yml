@@ -8,7 +8,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /storage/beszel/agent_data
+      device: ${DEFAULT_STORAGE_FOLDER}/agent_data
       o: bind
 
 services:

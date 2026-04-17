@@ -1,68 +1,66 @@
 # Beszel Self-Hosted
 
-Beszel Self-Hosted is a self-hosted implementation for secure, private data storage and management. This repository provides the necessary scripts and configuration to run Beszel using Docker Compose.
+Welcome to Beszel Self-Hosted - your personal server monitoring solution that keeps your data private and secure.
 
-## Features
-- Secure data storage
-- Easy backup and restore
-- Docker-based deployment
-- Auxiliary database support
+## What is Beszel?
 
-## Getting Started
+Beszel is a self-hosted monitoring system that lets you keep track of your servers and applications from one central dashboard. Think of it as your own private control center where you can:
 
-### Prerequisites
-- Docker
-- Docker Compose
+- Monitor multiple servers from one place
+- Watch Docker containers and their performance
+- Track system resources like CPU, memory, and disk usage
+- Keep all your monitoring data private on your own servers
+- Easily backup and restore your monitoring data
 
+## How It Works
 
-### Installation
-1. Clone this repository:
-  ```bash
-  git clone https://github.com/alvinpaul76/beszel-self-hosted.git
-  cd beszel-self-hosted
-  ```
-2. Create required Docker volumes:
-  ```bash
-  ./create_volumes.sh
-  ```
-3. Start the main services:
-  ```bash
-  docker-compose up -d
-  ```
+Beszel has two main parts:
 
-### Agent-Specific Deployment
-For agent deployments, use the `docker-compose-agent.yml` file. This configuration is designed for running Beszel agents, which connect to a central hub and monitor specific filesystems or disks.
+1. **The Hub** - This is your central dashboard where you view all your monitoring data
+2. **Agents** - Small programs that run on each server you want to monitor, sending data back to the hub
 
-#### Usage
-1. Ensure the required environment variables are set (see comments in `docker-compose-agent.yml`).
-2. Start the agent service:
-  ```bash
-  docker-compose -f docker-compose-agent.yml up -d
-  ```
-3. The agent will use the `beszel_agent_data` volume and can monitor additional disks by mounting them as described in the compose file.
+## Quick Start
 
-**Note:** The agent configuration uses `network_mode: host` and requires access to the Docker socket for monitoring containers.
+New to Beszel? Here's the fastest way to get started:
 
-### Data Directory Structure
-- `beszel_data/`
-  - `auxiliary.db` - Auxiliary database file
-  - `data.db`, `data.db-shm`, `data.db-wal` - Main database files
-  - `id_ed25519` - Private key for encryption
-  - `backups/` - Directory for database backups
+1. **Read the Introduction** - Learn what Beszel can do for you
+2. **Check Prerequisites** - Make sure your system is ready
+3. **Install Beszel** - Follow our step-by-step guide
+4. **Configure Your System** - Set up your hub and agents
+5. **Start Monitoring** - Begin watching your servers
 
-## Usage
-- To view running containers:
-  ```bash
-  docker ps -a
-  ```
-- To stop the services:
-  ```bash
-  docker-compose down
-  ```
-- To backup data, copy files from `beszel_data/backups/`.
+## Documentation
+
+We've split our documentation into easy-to-follow guides:
+
+- **[Introduction](docs/01-introduction.md)** - Learn what Beszel is and why you might need it
+- **[Prerequisites](docs/02-prerequisites.md)** - What you need before installing
+- **[Installation Guide](docs/03-installation.md)** - Step-by-step installation instructions
+- **[Configuration Guide](docs/04-configuration.md)** - How to set up Beszel for your needs
+- **[Getting Started](docs/05-getting-started.md)** - First steps after installation
+- **[Using the Hub](docs/06-using-the-hub.md)** - How to use the central dashboard
+- **[Using the Agent](docs/07-using-the-agent.md)** - Setting up agents on your servers
+- **[Backup and Restore](docs/08-backup-and-restore.md)** - Keeping your data safe
+- **[Troubleshooting](docs/09-troubleshooting.md)** - Solutions to common problems
+- **[FAQ](docs/10-faq.md)** - Frequently asked questions
+
+## Why Self-Hosted?
+
+With Beszel Self-Hosted, you're in control:
+
+- **Privacy** - Your monitoring data stays on your servers
+- **No Monthly Fees** - Once set up, there are no subscription costs
+- **Customization** - Configure it exactly how you want
+- **No Vendor Lock-in** - Your data is yours, always
+
+## Need Help?
+
+If you run into any issues:
+
+1. Check our [Troubleshooting Guide](docs/09-troubleshooting.md)
+2. Look through our [FAQ](docs/10-faq.md)
+3. Open an issue in this repository
 
 ## License
-This project is licensed under the terms of the LICENSE file in this repository.
 
-## Support
-For issues or feature requests, please open an issue in this repository.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

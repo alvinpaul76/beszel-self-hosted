@@ -8,26 +8,26 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /storage/beszel/data
+      device: ${DEFAULT_STORAGE_FOLDER}/data
       o: bind
   beszel_agent_data:
     driver: local
     driver_opts:
       type: none
-      device: /storage/beszel/agent_data
+      device: ${DEFAULT_STORAGE_FOLDER}/agent_data
       o: bind
 
 services:
-  beszel:
-    image: ${BESZEL_IMAGE}
-    container_name: ${BESZEL_CONTAINER_NAME}
-    restart: ${BESZEL_RESTART}
-    ports:
-      - ${BESZEL_PORT}:8090
-    volumes:
-      - beszel_data:/beszel_data
-    networks:
-      - shared-network
+  # beszel:
+  #   image: ${BESZEL_IMAGE}
+  #   container_name: ${BESZEL_CONTAINER_NAME}
+  #   restart: ${BESZEL_RESTART}
+  #   ports:
+  #     - ${BESZEL_PORT}:8090
+  #   volumes:
+  #     - beszel_data:/beszel_data
+  #   networks:
+  #     - shared-network
 
   beszel-agent:
     image: ${BESZEL_AGENT_IMAGE}
