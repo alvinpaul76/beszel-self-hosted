@@ -1,0 +1,26 @@
+services:
+  beszel:
+    image: ${BESZEL_IMAGE}
+    container_name: ${BESZEL_CONTAINER_NAME}
+    restart: ${BESZEL_RESTART}
+    ports:
+      - ${BESZEL_PORT}:8090
+    volumes:
+      - beszel_data:/beszel_data
+    environment:
+      TZ: ${TZ}
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    name: ${SHARED_DOCKER_NETWORK}
+    external: true
+
+volumes:
+  beszel_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DEFAULT_STORAGE_FOLDER}/data
+      o: bind

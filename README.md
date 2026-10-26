@@ -21,27 +21,64 @@ Beszel Self-Hosted is a self-hosted implementation for secure, private data stor
   git clone https://github.com/alvinpaul76/beszel-self-hosted.git
   cd beszel-self-hosted
   ```
-2. Create required Docker volumes:
+
+The repo has two independent deployments, each in its own folder with its own `docker-compose.yml` and `.env`:
+
+- `hub/` – the Beszel hub (web UI and database)
+- `agent/` – the Beszel agent, run on every host you want to monitor
+
+### Environment files
+Each folder reads the `.env` in the directory you run `docker compose` from, so the hub and agent are configured separately:
+
+- `hub/.env` is only needed on the machine running the hub.
+- `agent/.env` is only needed on each machine you want to monitor.
+- `.env` files are gitignored because they hold the agent `KEY` and `TOKEN`. Only `.env.example` is committed.
+- On a fresh clone, create each one with `cp .env.example .env` and fill in the values.
+
+### Hub
+1. Create the volume directories and the env file:
   ```bash
-  ./create_volumes.sh
+  sudo ./create_volumes.sh hub
+  cd hub
+  cp .env.example .env
   ```
-3. Start the main services:
+2. Start the hub:
   ```bash
-  docker-compose up -d
+  docker compose up -d
+  ```
+3. Open the hub UI, add a system, and copy the agent `KEY` and `TOKEN`.
+
+### Agent
+Run this on every host you want to monitor.
+
+1. Create the volume directories and the env file:
+  ```bash
+  sudo ./create_volumes.sh agent
+  cd agent
+  cp .env.example .env
+  ```
+2. Set `BESZEL_AGENT_KEY`, `BESZEL_AGENT_TOKEN` and `BESZEL_AGENT_HUB_URL` in `agent/.env`.
+3. Start the agent:
+  ```bash
+  docker compose up -d
   ```
 
-### Agent-Specific Deployment
-For agent deployments, use the `docker-compose-agent.yml` file. This configuration is designed for running Beszel agents, which connect to a central hub and monitor specific filesystems or disks.
+Additional disks can be monitored by mounting them under `/extra-filesystems` (see comments in `agent/docker-compose.yml`).
 
-#### Usage
-1. Ensure the required environment variables are set (see comments in `docker-compose-agent.yml`).
-2. Start the agent service:
-  ```bash
-  docker-compose -f docker-compose-agent.yml up -d
-  ```
-3. The agent will use the `beszel_agent_data` volume and can monitor additional disks by mounting them as described in the compose file.
+**Note:** The agent uses `network_mode: host` and needs read access to the Docker socket for monitoring containers.
 
-**Note:** The agent configuration uses `network_mode: host` and requires access to the Docker socket for monitoring containers.
+### Monitoring the hub's own host
+The hub does not monitor the machine it runs on. To do that, run the agent there too:
+
+1. Start the hub (`cd hub && docker compose up -d`).
+2. Add a system in the hub UI to get the `KEY` and `TOKEN`.
+3. Put them in `agent/.env` and keep `BESZEL_AGENT_HUB_URL=http://localhost:8090`.
+4. Start the agent (`cd agent && docker compose up -d`).
+
+The two stacks are independent, so either can be restarted or stopped without affecting the other.
+
+### Monitoring other hosts
+Run only the agent on those machines. Set `BESZEL_AGENT_HUB_URL` to an address that reaches your hub, such as `https://beszel.example.com` or `http://<hub-ip>:8090`, not `localhost`.
 
 ### Data Directory Structure
 - `beszel_data/`
@@ -57,7 +94,7 @@ For agent deployments, use the `docker-compose-agent.yml` file. This configurati
   ```
 - To stop the services:
   ```bash
-  docker-compose down
+  docker compose down   # run inside hub/ or agent/
   ```
 - To backup data, copy files from `beszel_data/backups/`.
 

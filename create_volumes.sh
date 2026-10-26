@@ -7,8 +7,15 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-# Check if docker-compose.yml exists
-DOCKER_COMPOSE_FILE="$(dirname "$0")/docker-compose.yml"
+# Target deployment: hub or agent
+TARGET="$1"
+if [ "$TARGET" != "hub" ] && [ "$TARGET" != "agent" ]; then
+    echo "Usage: sudo $0 <hub|agent>"
+    exit 1
+fi
+
+# Check if the compose file exists
+DOCKER_COMPOSE_FILE="$(dirname "$0")/$TARGET/docker-compose.yml"
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     echo "Error: docker-compose.yml not found at $DOCKER_COMPOSE_FILE"
     exit 1
@@ -56,4 +63,4 @@ else
 fi
 
 echo "✓ All required directories have been created successfully!"
-echo "✓ You can now run 'docker-compose up -d' to start the Beszel service."
+echo "✓ You can now run 'docker compose up -d' inside $TARGET/ to start the Beszel $TARGET."

@@ -1,16 +1,3 @@
-networks:
-  shared-network:
-    name: ${SHARED_DOCKER_NETWORK}
-    external: true
-
-volumes:
-  beszel_agent_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /storage/beszel/agent_data
-      o: bind
-
 services:
   beszel-agent:
     image: ${BESZEL_AGENT_IMAGE}
@@ -27,3 +14,17 @@ services:
       KEY: ${BESZEL_AGENT_KEY}
       TOKEN: ${BESZEL_AGENT_TOKEN}
       HUB_URL: ${BESZEL_AGENT_HUB_URL}
+      TZ: ${TZ}
+
+networks:
+  shared-network:
+    name: ${SHARED_DOCKER_NETWORK}
+    external: true
+
+volumes:
+  beszel_agent_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DEFAULT_STORAGE_FOLDER}/agent_data
+      o: bind
