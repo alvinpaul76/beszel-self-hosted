@@ -55,11 +55,11 @@ Yes, Beszel requires Docker and Docker Compose to be installed on your server. S
 
 ### Can I use a different port than 8090?
 
-Yes. Edit the `.env` file and change `BESZEL_PORT` to your preferred port. Make sure to update your firewall rules accordingly.
+Yes. Edit `hub/.env` and change `BESZEL_PORT` to your preferred port. Make sure to update your firewall rules accordingly.
 
 ### What if the create_volumes.sh script fails?
 
-The script requires sudo privileges and a valid `.env` file. Make sure you're running it with `sudo` and that the `.env` file exists in the same directory. Check the error message for specific issues.
+The script requires sudo privileges and a valid `.env` file for the target. Make sure you're running it as `sudo ./create_volumes.sh hub` (or `agent`) from the repo root and that `hub/.env` (or `agent/.env`) exists. Check the error message for specific issues.
 
 ## Configuration Questions
 
@@ -195,7 +195,7 @@ See the [Troubleshooting Guide](09-troubleshooting.md) for more help.
 
 ### My agent won't connect to the hub. What should I do?
 
-1. Verify the HUB_URL is correct in the agent's `.env`
+1. Verify the HUB_URL is correct in the `agent/.env`
 2. Check that the KEY and TOKEN match what's in the hub
 3. Test network connectivity from agent to hub
 4. Check firewall rules

@@ -72,23 +72,7 @@ BESZEL_PORT=8090
 - `BESZEL_RESTART`: When to restart the container (keep "unless-stopped")
 - `BESZEL_PORT`: The port Beszel will use (8090 is the default, you can change if needed)
 
-**Beszel Agent Settings:**
-```
-BESZEL_AGENT_IMAGE=henrygd/beszel-agent
-BESZEL_AGENT_CONTAINER_NAME=beszel-agent
-BESZEL_AGENT_RESTART=unless-stopped
-BESZEL_AGENT_PORT=45876
-BESZEL_AGENT_KEY=<put beszel agent key>
-BESZEL_AGENT_TOKEN=<put beszel agent token>
-BESZEL_AGENT_HUB_URL=http://localhost:8090
-```
-- `BESZEL_AGENT_IMAGE`: The Docker image for the agent (keep as is)
-- `BESZEL_AGENT_CONTAINER_NAME`: The name of the agent container (keep as is)
-- `BESZEL_AGENT_RESTART`: When to restart the agent (keep "unless-stopped")
-- `BESZEL_AGENT_PORT`: The port the agent uses (keep as is)
-- `BESZEL_AGENT_KEY`: You'll get this from the hub after you start it (leave as is for now)
-- `BESZEL_AGENT_TOKEN`: You'll get this from the hub after you start it (leave as is for now)
-- `BESZEL_AGENT_HUB_URL`: The URL of the hub (keep as is if hub is on same server)
+The agent has its own settings file, `agent/.env`. You'll fill it in after the hub is running (see [Setting Up Agents](#step-2-install-beszel-on-the-agent-server)).
 
 **Save and Exit:**
 - In nano: Press Ctrl+X, then Y, then Enter
@@ -117,17 +101,18 @@ The script reads your `.env` file and creates directories based on your configur
 
 If you see errors, make sure:
 - You're running the script with sudo (it requires administrator privileges)
-- The `.env` file exists in the same directory
+- `hub/.env` (or `agent/.env`) exists, and you passed `hub` or `agent` as the argument
 - The directory path in `DEFAULT_STORAGE_FOLDER` is valid
 
 ### Step 4: Start the Beszel Services
 
 Now you're ready to start Beszel!
 
-**Start the Hub and Agent:**
+**Start the Hub:**
 
 ```bash
-docker-compose up -d
+cd hub
+docker compose up -d
 ```
 
 This command:
@@ -163,7 +148,7 @@ You should see two containers running:
 If you want to see what's happening:
 
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
 Press Ctrl+C to stop watching the logs.
@@ -205,12 +190,12 @@ From the Beszel hub web interface:
 Repeat the same installation steps as above on the agent server:
 
 1. Download the files
-2. Copy `.env.example` to `.env`
-3. Edit the `.env` file with the agent details
+2. Copy `agent/.env.example` to `agent/.env`
+3. Edit `agent/.env` with the agent details
 
 **Important Configuration for Agents:**
 
-When editing the `.env` file on the agent server, make sure to:
+When editing `agent/.env` on the agent server, make sure to:
 
 - Set `BESZEL_AGENT_KEY` to the key you got from the hub
 - Set `BESZEL_AGENT_TOKEN` to the token you got from the hub
@@ -246,7 +231,7 @@ cd agent
 docker compose up -d
 ```
 
-This file only includes the agent service, which is useful for:
+The `agent/` folder only includes the agent service, which is useful for:
 - Servers that don't need the hub
 - Reducing resource usage on agent servers
 - Running multiple agents on different servers
@@ -257,12 +242,12 @@ This file only includes the agent service, which is useful for:
 
 **Check the logs:**
 ```bash
-docker-compose logs beszel
-docker-compose logs beszel-agent
+docker compose logs beszel      # run inside hub/
+docker compose logs beszel-agent  # run inside agent/
 ```
 
 **Common issues:**
-- Port already in use: Change `BESZEL_PORT` in `.env`
+- Port already in use: Change `BESZEL_PORT` in `hub/.env`
 - Permission denied: Make sure directories exist and have correct permissions
 - Docker not running: Check if Docker is installed and running
 
@@ -282,7 +267,7 @@ Make sure you're using the correct IP address in your browser.
 ### Agent Won't Connect to Hub
 
 **Check the HUB_URL:**
-Make sure `BESZEL_AGENT_HUB_URL` in the agent's `.env` file is correct and reachable from the agent server.
+Make sure `BESZEL_AGENT_HUB_URL` in `agent/.env` is correct and reachable from the agent server.
 
 **Check the KEY and TOKEN:**
 Make sure you copied the KEY and TOKEN correctly from the hub.

@@ -82,11 +82,12 @@ Make sure there are no typos and all values are set correctly.
 **Possible causes and solutions:**
 
 **Not running as root:**
-- Run with sudo: `sudo ./create_volumes.sh`
+- Run with sudo and a target: `sudo ./create_volumes.sh hub` (or `agent`)
 
 **.env file not found:**
-- Make sure you're in the correct directory
-- Check that `.env` exists: `ls -la .env`
+- The script reads `hub/.env` or `agent/.env`, matching the target you pass
+- Create it first: `cp hub/.env.example hub/.env`
+- Check that it exists: `ls -la hub/.env`
 
 **Directory permissions:**
 - Check you have permission to create directories
@@ -115,7 +116,7 @@ docker-compose up -d
 ```
 
 **Check the port:**
-- Verify `BESZEL_PORT` in `.env` is set to 8090 (or your chosen port)
+- Verify `BESZEL_PORT` in `hub/.env` is set to 8090 (or your chosen port)
 - Try the correct port in your browser
 
 **Check firewall:**
@@ -219,7 +220,7 @@ docker-compose restart beszel
 
 **Solutions:**
 
-**Check HUB_URL in agent's .env:**
+**Check HUB_URL in `agent/.env`:**
 - Verify the IP address or domain name is correct
 - Make sure the hub is accessible from the agent server
 - Try: `curl http://hub-ip:8090` from the agent server
@@ -262,7 +263,7 @@ docker-compose restart beszel-agent
 **Check if credentials changed:**
 - Some updates might require regenerating credentials
 - Get new KEY and TOKEN from the hub
-- Update the agent's `.env` file
+- Update `agent/.env`
 - Restart the agent
 
 **Reconnect the agent:**
@@ -303,7 +304,7 @@ docker-compose restart beszel-agent
 **Solutions:**
 
 **Check the socket mount:**
-In `docker-compose.yml`, verify this line exists:
+In `agent/docker-compose.yml`, verify this line exists:
 ```yaml
 - /var/run/docker.sock:/var/run/docker.sock:ro
 ```
@@ -369,7 +370,7 @@ sudo lsof -i :8090
 ```
 
 **Change the port:**
-- Edit `.env` and change `BESZEL_PORT` to a different port
+- Edit `hub/.env` and change `BESZEL_PORT` to a different port
 - Restart Beszel: `docker-compose restart`
 - Update firewall rules for the new port
 
@@ -415,7 +416,7 @@ docker-compose up -d
 **Start fresh:**
 - Warning: This loses all historical data
 - Stop Beszel: `docker-compose down`
-- Remove database files: `rm /storage/beszel/data/beszel_data/*.db`
+- Remove database files: `rm /storage/beszel/data/*.db`
 - Start Beszel: `docker-compose up -d`
 - Reconnect agents
 

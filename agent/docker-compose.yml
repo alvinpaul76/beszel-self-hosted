@@ -16,11 +16,6 @@ services:
       HUB_URL: ${BESZEL_AGENT_HUB_URL}
       TZ: ${TZ}
 
-networks:
-  shared-network:
-    name: ${SHARED_DOCKER_NETWORK}
-    external: true
-
 volumes:
   beszel_agent_data:
     driver: local

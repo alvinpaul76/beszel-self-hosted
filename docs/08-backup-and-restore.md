@@ -29,17 +29,15 @@ By default, Beszel stores data in:
 
 ```
 /storage/beszel/
-├── data/
-│   ├── beszel_data/
-│   │   ├── data.db
-│   │   ├── auxiliary.db
-│   │   ├── id_ed25519
-│   │   └── backups/
-│   └── agent_data/
-└── .env
+├── data/          # hub data, mounted at /beszel_data
+│   ├── data.db
+│   ├── auxiliary.db
+│   ├── id_ed25519
+│   └── backups/
+└── agent_data/    # agent data (if an agent runs on this host)
 ```
 
-Your actual location may differ based on your `DEFAULT_STORAGE_FOLDER` setting in `.env`.
+Your actual location may differ based on `DEFAULT_STORAGE_FOLDER` in `hub/.env` / `agent/.env`. The `.env` files live in the repo's `hub/` and `agent/` folders, not in the storage folder; back them up separately.
 
 ## Creating Backups
 
@@ -50,7 +48,7 @@ The simplest way to backup is to copy the data directory.
 **Stop Beszel First:**
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 **Copy the Data Directory:**
@@ -63,13 +61,13 @@ mkdir -p /backups/beszel
 cp -r /storage/beszel /backups/beszel/$(date +%Y%m%d)
 
 # Copy the configuration file
-cp .env /backups/beszel/$(date +%Y%m%d)/
+cp hub/.env /backups/beszel/$(date +%Y%m%d)/
 ```
 
 **Restart Beszel:**
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Automated Backup Script
@@ -83,21 +81,21 @@ Create a script to automate backups:
 BACKUP_DIR="/backups/beszel"
 DATE=$(date +%Y%m%d_%H%M%S)
 SOURCE_DIR="/storage/beszel"
-CONFIG_FILE="/path/to/beszel/.env"
+CONFIG_FILE="/path/to/beszel-self-hosted/hub/.env"
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
 
 # Stop Beszel
-cd /path/to/beszel
-docker-compose down
+cd /path/to/beszel-self-hosted/hub
+docker compose down
 
 # Create backup
 cp -r "$SOURCE_DIR" "$BACKUP_DIR/beszel_$DATE"
 cp "$CONFIG_FILE" "$BACKUP_DIR/beszel_$DATE/"
 
 # Restart Beszel
-docker-compose up -d
+docker compose up -d
 
 # Remove old backups (keep last 7 days)
 find "$BACKUP_DIR" -type d -name "beszel_*" -mtime +7 -exec rm -rf {} \;
@@ -154,16 +152,16 @@ scp -r /storage/beszel user@remote-server:/backups/
 
 You must backup these files:
 
-- `.env` - Configuration file
-- `data/beszel_data/data.db` - Main database
-- `data/beszel_data/auxiliary.db` - Auxiliary database
-- `data/beszel_data/id_ed25519` - Encryption key
+- `hub/.env` (and `agent/.env`) - Configuration files
+- `data/data.db` - Main database
+- `data/auxiliary.db` - Auxiliary database
+- `data/id_ed25519` - Encryption key
 
 ### Optional Files
 
 These can be regenerated but are nice to have:
 
-- `data/beszel_data/backups/` - Existing backups
+- `data/backups/` - Existing backups
 - `data/agent_data/` - Agent data (can be regenerated)
 
 ### What Not to Backup
@@ -183,7 +181,7 @@ If you need to restore your hub:
 **Stop Beszel:**
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 **Restore the Data:**
@@ -196,13 +194,13 @@ rm -rf /storage/beszel/data
 cp -r /backups/beszel/20240101/data /storage/beszel/
 
 # Restore configuration
-cp /backups/beszel/20240101/.env /path/to/beszel/
+cp /backups/beszel/20240101/.env /path/to/beszel-self-hosted/hub/
 ```
 
 **Restart Beszel:**
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 **Verify the Restore:**
@@ -217,10 +215,10 @@ docker-compose up -d
 If you're moving Beszel to a new server:
 
 1. Install Beszel on the new server following the [Installation Guide](03-installation.md)
-2. Stop the new installation: `docker-compose down`
+2. Stop the new installation: `docker compose down`
 3. Copy your backup to the new server
 4. Restore the data as shown above
-5. Start Beszel: `docker-compose up -d`
+5. Start Beszel: `docker compose up -d`
 6. Update agent configurations if the hub IP changed
 
 ### Partial Restore
@@ -230,16 +228,16 @@ If you only need to restore specific files:
 **Just the database:**
 
 ```bash
-docker-compose down
-cp /backups/beszel/20240101/data/beszel_data/data.db /storage/beszel/data/beszel_data/
-docker-compose up -d
+docker compose down
+cp /backups/beszel/20240101/data/data.db /storage/beszel/data/
+docker compose up -d
 ```
 
 **Just the configuration:**
 
 ```bash
-cp /backups/beszel/20240101/.env /path/to/beszel/
-docker-compose restart
+cp /backups/beszel/20240101/.env /path/to/beszel-self-hosted/hub/
+docker compose restart
 ```
 
 ## Backup Best Practices

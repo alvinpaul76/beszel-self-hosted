@@ -24,11 +24,15 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-# Load .env into current environment, ignoring comments and empty lines
-set -o allexport
-# shellcheck disable=SC1090
-source <(grep -v '^\s*#' "$ENV_FILE" | grep -v '^\s*$')
-set +o allexport
+# Load KEY=VALUE pairs from .env without executing them as shell code
+# (values such as <placeholders> or SSH keys with spaces would break `source`)
+while IFS= read -r line || [ -n "$line" ]; do
+    [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || continue
+    value="${BASH_REMATCH[2]}"
+    value="${value%\"}"; value="${value#\"}"
+    value="${value%\'}"; value="${value#\'}"
+    export "${BASH_REMATCH[1]}=$value"
+done < "$ENV_FILE"
 
 # Check if docker-compose.yml exists
 DOCKER_COMPOSE_FILE="$SCRIPT_DIR/$TARGET/docker-compose.yml"

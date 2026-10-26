@@ -20,26 +20,27 @@ If you haven't installed the agent yet, follow the [Installation Guide](03-insta
 **Quick Summary:**
 
 1. Download Beszel files to the server
-2. Copy `.env.example` to `.env`
-3. Edit `.env` with your hub details
-4. Run `sudo ./create_volumes.sh`
-5. Start with `docker-compose up -d`
+2. Copy `agent/.env.example` to `agent/.env`
+3. Edit `agent/.env` with your hub details
+4. Run `sudo ./create_volumes.sh agent`
+5. Start with `cd agent && docker compose up -d`
 
 ### Agent-Only Installation
 
 For servers that only need the agent (not the hub):
 
 ```bash
-docker-compose -f docker-compose-agent.yml up -d
+cd agent
+docker compose up -d
 ```
 
-This uses less resources since it only runs the agent.
+The `agent/` folder only runs the agent, so it uses fewer resources than the hub.
 
 ## Configuring the Agent
 
 ### Setting the Hub Connection
 
-The agent needs to know how to reach your hub. Edit the `.env` file:
+The agent needs to know how to reach your hub. Edit `agent/.env`:
 
 ```
 BESZEL_AGENT_HUB_URL=http://your-hub-ip:8090
@@ -55,7 +56,7 @@ Each agent needs unique credentials from the hub:
 2. Go to the Agents section
 3. Click "Add New Agent"
 4. The hub will generate a KEY and TOKEN
-5. Copy these to your agent's `.env` file:
+5. Copy these to `agent/.env`:
 
 ```
 BESZEL_AGENT_KEY=your-unique-key
@@ -78,10 +79,10 @@ If your server has multiple disks or partitions you want to monitor:
 
 ### Edit the Docker Compose File
 
-Open `docker-compose.yml` or `docker-compose-agent.yml`:
+Open `agent/docker-compose.yml`:
 
 ```bash
-nano docker-compose.yml
+nano agent/docker-compose.yml
 ```
 
 ### Add Volume Mounts
@@ -107,13 +108,8 @@ volumes:
 After adding disk mounts:
 
 ```bash
-docker-compose restart beszel-agent
-```
-
-Or if using the agent-only file:
-
-```bash
-docker-compose -f docker-compose-agent.yml restart beszel-agent
+cd agent
+docker compose restart beszel-agent
 ```
 
 ## Managing the Agent
@@ -293,7 +289,7 @@ Errors can sometimes cause high resource usage.
 The agent needs access to the Docker socket to monitor containers. If you see permission errors:
 
 **Check the socket mount:**
-In `docker-compose.yml`, ensure this line exists:
+In `agent/docker-compose.yml`, ensure this line exists:
 ```yaml
 - /var/run/docker.sock:/var/run/docker.sock:ro
 ```
@@ -331,7 +327,7 @@ docker-compose logs beszel
 
 For servers that only need to run the agent (not the hub):
 
-- Use `docker-compose-agent.yml`
+- Use the `agent/` folder
 - This reduces resource usage
 - Simpler configuration
 - Easier to manage

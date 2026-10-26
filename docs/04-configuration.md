@@ -4,27 +4,29 @@ This guide explains how to configure Beszel to work best for your needs. You'll 
 
 ## Understanding the .env File
 
-All Beszel configuration is done through the `.env` file in your installation directory. This file contains all the settings that control how Beszel runs.
+Configuration is done through two `.env` files: `hub/.env` for the hub and `agent/.env` for the agent. Each is copied from the `.env.example` in the same folder. This file contains all the settings that control how Beszel runs.
 
 ### Opening the Configuration File
 
 To edit your configuration:
 
 ```bash
-nano .env
+nano hub/.env     # or agent/.env
 ```
 
 Or use your preferred text editor.
 
 ### Configuration Options Explained
 
-#### Shared Docker Network
+#### Shared Docker Network (hub only)
 
 ```
 SHARED_DOCKER_NETWORK=cloudflared_shared-network
 ```
 
-**What it does:** Defines the name of the Docker network that Beszel containers use to communicate.
+**What it does:** Defines the name of the external Docker network the hub joins. The network must already exist (`docker network create <name>`). The agent runs with `network_mode: host`, so it has no network setting.
+
+The default name comes from the author's Cloudflare Tunnel setup; change it to a network you have, or create one with that name.
 
 **When to change it:** 
 - If you're using other Docker services that need to connect to Beszel
@@ -158,16 +160,16 @@ If you have multiple people who need access:
 On the server where you want to run the agent:
 
 1. Install Beszel following the [Installation Guide](03-installation.md)
-2. Edit the `.env` file
+2. Copy `agent/.env.example` to `agent/.env` and edit it
 3. Set the `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` from the hub
 4. Set `BESZEL_AGENT_HUB_URL` to point to your hub
-5. Start the agent: `docker-compose up -d`
+5. Run `sudo ./create_volumes.sh agent`, then start the agent: `cd agent && docker compose up -d`
 
 ### Monitoring Additional Disks
 
 If you want to monitor additional disks or partitions on an agent server:
 
-1. Edit `hub/docker-compose.yml` or `agent/docker-compose.yml`
+1. Edit `agent/docker-compose.yml`
 2. Find the volumes section under the beszel-agent service
 3. Uncomment and modify the extra-filesystems line:
    ```
@@ -177,7 +179,7 @@ If you want to monitor additional disks or partitions on an agent server:
 5. Replace `sda1` with a name for your disk
 6. Restart the agent:
    ```bash
-   docker-compose restart beszel-agent
+   docker compose restart beszel-agent
    ```
 
 The `:ro` at the end means "read-only" - the agent can read from the disk but cannot write to it, which is safer.
@@ -262,25 +264,27 @@ If you're monitoring many servers with high-frequency data collection:
 
 ## Applying Configuration Changes
 
-After changing the `.env` file, you need to restart the services:
+After changing a `.env` file, recreate the containers from that folder (`hub/` or `agent/`):
 
 ```bash
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 If you only changed agent settings, you can restart just the agent:
 
 ```bash
-docker-compose restart beszel-agent
+cd agent
+docker compose restart beszel-agent
 ```
 
 ## Backup Your Configuration
 
-It's a good idea to keep a backup of your `.env` file:
+It's a good idea to keep a backup of your `.env` files:
 
 ```bash
-cp .env .env.backup
+cp hub/.env hub/.env.backup
+cp agent/.env agent/.env.backup
 ```
 
 You can also version control it with Git (but be careful not to commit sensitive values like keys and tokens).
@@ -299,7 +303,7 @@ This is the simplest setup. Use the default settings:
 - On the hub server: Keep default settings, ensure firewall allows port 8090
 - On the agent server: Set `BESZEL_AGENT_HUB_URL=http://hub-server-ip:8090`
 - Ensure the agent server can reach the hub server's IP address
-- Copy the KEY and TOKEN from the hub to the agent's `.env` file
+- Copy the KEY and TOKEN from the hub to `agent/.env`
 
 ### Scenario 3: Multiple Agents, One Hub
 
