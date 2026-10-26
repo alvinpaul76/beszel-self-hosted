@@ -26,14 +26,26 @@ echo "Creating required directories based on docker-compose.yml volumes..."
 # Extract volume paths from docker-compose.yml
 echo "Extracting volume paths from docker-compose.yml..."
 
+# Resolve the storage folder: $TARGET/.env, then the environment, then the default
+ENV_FILE="$(dirname "$0")/$TARGET/.env"
+STORAGE_FOLDER=""
+if [ -f "$ENV_FILE" ]; then
+    STORAGE_FOLDER=$(grep -E '^DEFAULT_STORAGE_FOLDER=' "$ENV_FILE" | tail -n 1 | cut -d= -f2- | tr -d "\"'\r")
+fi
+STORAGE_FOLDER="${STORAGE_FOLDER:-${DEFAULT_STORAGE_FOLDER:-/storage/beszel}}"
+STORAGE_FOLDER="${STORAGE_FOLDER%/}"
+
 # Create a base directory for all volumes
-BASE_DIR="/storage/beszel"
+BASE_DIR="$STORAGE_FOLDER"
 mkdir -p "$BASE_DIR"
 echo "✓ Created base directory $BASE_DIR"
 
 # Extract device paths from docker-compose.yml using grep and awk
 echo "Extracting volume paths from docker-compose.yml..."
 DEVICE_PATHS=$(grep -A 2 "device:" "$DOCKER_COMPOSE_FILE" | grep "device:" | awk '{print $2}')
+
+# Expand ${DEFAULT_STORAGE_FOLDER} in the extracted paths
+DEVICE_PATHS="${DEVICE_PATHS//\$\{DEFAULT_STORAGE_FOLDER\}/$STORAGE_FOLDER}"
 
 # Check if we found any paths
 if [ -z "$DEVICE_PATHS" ]; then

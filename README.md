@@ -34,13 +34,14 @@ Each folder reads the `.env` in the directory you run `docker compose` from, so 
 - `agent/.env` is only needed on each machine you want to monitor.
 - `.env` files are gitignored because they hold the agent `KEY` and `TOKEN`. Only `.env.example` is committed.
 - On a fresh clone, create each one with `cp .env.example .env` and fill in the values.
+- `DEFAULT_STORAGE_FOLDER` sets where the volumes are stored (default `/storage/beszel`). `create_volumes.sh` reads it from `<hub|agent>/.env`, so create the `.env` before running the script.
 
 ### Hub
 1. Create the volume directories and the env file:
   ```bash
+  cp hub/.env.example hub/.env
   sudo ./create_volumes.sh hub
   cd hub
-  cp .env.example .env
   ```
 2. Start the hub:
   ```bash
@@ -53,9 +54,9 @@ Run this on every host you want to monitor.
 
 1. Create the volume directories and the env file:
   ```bash
+  cp agent/.env.example agent/.env
   sudo ./create_volumes.sh agent
   cd agent
-  cp .env.example .env
   ```
 2. Set `BESZEL_AGENT_KEY`, `BESZEL_AGENT_TOKEN` and `BESZEL_AGENT_HUB_URL` in `agent/.env`.
 3. Start the agent:
