@@ -3,7 +3,7 @@
 # Check if script is run as root
 if [ "$(id -u)" != "0" ]; then
     echo "This script must be run with sudo privileges"
-    echo "Please run: sudo $0"
+    echo "Usage: sudo $0 <hub|agent>"
     exit 1
 fi
 
