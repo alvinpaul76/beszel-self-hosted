@@ -1,106 +1,75 @@
 # Beszel Self-Hosted
 
-Beszel Self-Hosted is a self-hosted implementation for secure, private data storage and management. This repository provides the necessary scripts and configuration to run Beszel using Docker Compose.
+Welcome to Beszel Self-Hosted - your personal server monitoring solution that keeps your data private and secure.
 
-## Features
-- Secure data storage
-- Easy backup and restore
-- Docker-based deployment
-- Auxiliary database support
+## What is Beszel?
 
-## Getting Started
+Beszel is a self-hosted monitoring system that lets you keep track of your servers and applications from one central dashboard. Think of it as your own private control center where you can:
 
-### Prerequisites
-- Docker
-- Docker Compose
+- Monitor multiple servers from one place
+- Watch Docker containers and their performance
+- Track system resources like CPU, memory, and disk usage
+- Keep all your monitoring data private on your own servers
+- Easily backup and restore your monitoring data
 
+## How It Works
 
-### Installation
-1. Clone this repository:
-  ```bash
-  git clone https://github.com/alvinpaul76/beszel-self-hosted.git
-  cd beszel-self-hosted
-  ```
+Beszel has two main parts:
 
-The repo has two independent deployments, each in its own folder with its own `docker-compose.yml` and `.env`:
+1. **The Hub** - This is your central dashboard where you view all your monitoring data
+2. **Agents** - Small programs that run on each server you want to monitor, sending data back to the hub
 
-- `hub/` – the Beszel hub (web UI and database)
-- `agent/` – the Beszel agent, run on every host you want to monitor
+## Quick Start
 
-### Environment files
-Each folder reads the `.env` in the directory you run `docker compose` from, so the hub and agent are configured separately:
+New to Beszel? Here's the fastest way to get started:
 
-- `hub/.env` is only needed on the machine running the hub.
-- `agent/.env` is only needed on each machine you want to monitor.
-- `.env` files are gitignored because they hold the agent `KEY` and `TOKEN`. Only `.env.example` is committed.
-- On a fresh clone, create each one with `cp .env.example .env` and fill in the values.
-- `DEFAULT_STORAGE_FOLDER` sets where the volumes are stored (default `/storage/beszel`). `create_volumes.sh` reads it from `<hub|agent>/.env`, so create the `.env` before running the script.
+1. **Read the Introduction** - Learn what Beszel can do for you
+2. **Check Prerequisites** - Make sure your system is ready
+3. **Install Beszel** - Follow our step-by-step guide
+4. **Configure Your System** - Set up your hub and agents
+5. **Start Monitoring** - Begin watching your servers
 
-### Hub
-1. Create the volume directories and the env file:
-  ```bash
-  cp hub/.env.example hub/.env
-  sudo ./create_volumes.sh hub
-  cd hub
-  ```
-2. Start the hub:
-  ```bash
-  docker compose up -d
-  ```
-3. Open the hub UI, add a system, and copy the agent `KEY` and `TOKEN`.
+## Repository Layout
 
-### Agent
-Run this on every host you want to monitor.
+The repo has two independent deployments, each with its own `docker-compose.yml` and `.env` (copy `.env.example` to `.env` and fill in the values):
 
-1. Create the volume directories and the env file:
-  ```bash
-  cp agent/.env.example agent/.env
-  sudo ./create_volumes.sh agent
-  cd agent
-  ```
-2. Set `BESZEL_AGENT_KEY`, `BESZEL_AGENT_TOKEN` and `BESZEL_AGENT_HUB_URL` in `agent/.env`.
-3. Start the agent:
-  ```bash
-  docker compose up -d
-  ```
+- `hub/` - the Beszel hub (web UI and database)
+- `agent/` - the Beszel agent, run on every host you want to monitor
 
-Additional disks can be monitored by mounting them under `/extra-filesystems` (see comments in `agent/docker-compose.yml`).
+Run `sudo ./create_volumes.sh <hub|agent>` to create the storage directories. It reads `DEFAULT_STORAGE_FOLDER` from `<hub|agent>/.env`, so create the `.env` first. Then run `docker compose up -d` inside that folder.
 
-**Note:** The agent uses `network_mode: host` and needs read access to the Docker socket for monitoring containers.
+## Documentation
 
-### Monitoring the hub's own host
-The hub does not monitor the machine it runs on. To do that, run the agent there too:
+We've split our documentation into easy-to-follow guides:
 
-1. Start the hub (`cd hub && docker compose up -d`).
-2. Add a system in the hub UI to get the `KEY` and `TOKEN`.
-3. Put them in `agent/.env` and keep `BESZEL_AGENT_HUB_URL=http://localhost:8090`.
-4. Start the agent (`cd agent && docker compose up -d`).
+- **[Introduction](docs/01-introduction.md)** - Learn what Beszel is and why you might need it
+- **[Prerequisites](docs/02-prerequisites.md)** - What you need before installing
+- **[Installation Guide](docs/03-installation.md)** - Step-by-step installation instructions
+- **[Configuration Guide](docs/04-configuration.md)** - How to set up Beszel for your needs
+- **[Getting Started](docs/05-getting-started.md)** - First steps after installation
+- **[Using the Hub](docs/06-using-the-hub.md)** - How to use the central dashboard
+- **[Using the Agent](docs/07-using-the-agent.md)** - Setting up agents on your servers
+- **[Backup and Restore](docs/08-backup-and-restore.md)** - Keeping your data safe
+- **[Troubleshooting](docs/09-troubleshooting.md)** - Solutions to common problems
+- **[FAQ](docs/10-faq.md)** - Frequently asked questions
 
-The two stacks are independent, so either can be restarted or stopped without affecting the other.
+## Why Self-Hosted?
 
-### Monitoring other hosts
-Run only the agent on those machines. Set `BESZEL_AGENT_HUB_URL` to an address that reaches your hub, such as `https://beszel.example.com` or `http://<hub-ip>:8090`, not `localhost`.
+With Beszel Self-Hosted, you're in control:
 
-### Data Directory Structure
-- `beszel_data/`
-  - `auxiliary.db` - Auxiliary database file
-  - `data.db`, `data.db-shm`, `data.db-wal` - Main database files
-  - `id_ed25519` - Private key for encryption
-  - `backups/` - Directory for database backups
+- **Privacy** - Your monitoring data stays on your servers
+- **No Monthly Fees** - Once set up, there are no subscription costs
+- **Customization** - Configure it exactly how you want
+- **No Vendor Lock-in** - Your data is yours, always
 
-## Usage
-- To view running containers:
-  ```bash
-  docker ps -a
-  ```
-- To stop the services:
-  ```bash
-  docker compose down   # run inside hub/ or agent/
-  ```
-- To backup data, copy files from `beszel_data/backups/`.
+## Need Help?
+
+If you run into any issues:
+
+1. Check our [Troubleshooting Guide](docs/09-troubleshooting.md)
+2. Look through our [FAQ](docs/10-faq.md)
+3. Open an issue in this repository
 
 ## License
-This project is licensed under the terms of the LICENSE file in this repository.
 
-## Support
-For issues or feature requests, please open an issue in this repository.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
