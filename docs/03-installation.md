@@ -43,7 +43,7 @@ cp hub/.env.example hub/.env
 Open the `.env` file in your favorite text editor:
 
 ```bash
-nano .env
+nano hub/.env
 ```
 
 You'll see several configuration options. Here's what each one means:
