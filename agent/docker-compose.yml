@@ -1,18 +1,73 @@
 services:
+  infisical-agent:
+    image: ${INFISICAL_CLI_IMAGE}
+    container_name: infisical-agent
+    entrypoint: ["/sbin/tini", "--", "/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        test -n "$$INFISICAL_UNIVERSAL_AUTH_CLIENT_ID" && test -n "$$INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET" || { echo "Infisical Universal Auth credentials are required" >&2; exit 1; }
+        # umask only for the credential files: the rendered file must stay readable by consumers.
+        ( umask 077
+          printf '%s' "$$INFISICAL_UNIVERSAL_AUTH_CLIENT_ID" > /run/infisical-auth/client-id
+          printf '%s' "$$INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET" > /run/infisical-auth/client-secret )
+        unset INFISICAL_UNIVERSAL_AUTH_CLIENT_ID INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET
+        exec /bin/infisical agent --config=/etc/infisical-agent/agent-config.yaml
+    env_file:
+      - .env.agent
+    volumes:
+      - ./infisical/agent-config.yaml:/etc/infisical-agent/agent-config.yaml:ro
+      - ./infisical/templates/beszel-agent.tpl:/templates/beszel-agent.tpl:ro
+      - shared_secrets:/shared-secrets
+    tmpfs:
+      - /run/infisical-auth:mode=0700
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    cpus: 0.5
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          test -s /shared-secrets/.agent-token &&
+          grep -qx '# render-complete' /shared-secrets/beszel-agent.env
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
   beszel-agent:
     image: ${BESZEL_AGENT_IMAGE}
     container_name: ${BESZEL_AGENT_CONTAINER_NAME}
     restart: ${BESZEL_AGENT_RESTART}
     network_mode: host
+    depends_on:
+      infisical-agent:
+        condition: service_healthy
+    # Secrets (KEY, TOKEN) come from Infisical via the shared volume. Needs an image with /bin/sh (e.g. the :alpine tag).
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        until [ -s /shared-secrets/beszel-agent.env ]; do sleep 1; done
+        while IFS= read -r line || [ -n "$$line" ]; do
+          case "$$line" in
+            BESZEL_AGENT_KEY=*|BESZEL_AGENT_TOKEN=*) export "$$line" ;;
+          esac
+        done < /shared-secrets/beszel-agent.env
+        test -n "$$BESZEL_AGENT_KEY" || { echo "BESZEL_AGENT_KEY missing from beszel-agent.env" >&2; exit 1; }
+        test -n "$$BESZEL_AGENT_TOKEN" || { echo "BESZEL_AGENT_TOKEN missing from beszel-agent.env" >&2; exit 1; }
+        export KEY="$$BESZEL_AGENT_KEY" TOKEN="$$BESZEL_AGENT_TOKEN"
+        exec /agent
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - beszel_agent_data:/var/lib/beszel-agent
+      - shared_secrets:/shared-secrets:ro
       # monitor other disks / partitions by mounting a folder in /extra-filesystems
       # - /mnt/disk/.beszel:/extra-filesystems/sda1:ro
     environment:
       LISTEN: ${BESZEL_AGENT_PORT}
-      KEY: ${BESZEL_AGENT_KEY}
-      TOKEN: ${BESZEL_AGENT_TOKEN}
       HUB_URL: ${BESZEL_AGENT_HUB_URL}
       TZ: ${TZ}
 
@@ -23,3 +78,5 @@ volumes:
       type: none
       device: ${DEFAULT_STORAGE_FOLDER}/agent_data
       o: bind
+  shared_secrets:
+    name: shared_secrets
