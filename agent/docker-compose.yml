@@ -1,7 +1,6 @@
 services:
   infisical-agent:
     image: ${INFISICAL_CLI_IMAGE}
-    container_name: infisical-agent
     entrypoint: ["/sbin/tini", "--", "/bin/sh", "-c"]
     command:
       - |
@@ -78,5 +77,4 @@ volumes:
       type: none
       device: ${DEFAULT_STORAGE_FOLDER}/agent_data
       o: bind
-  shared_secrets:
-    name: shared_secrets
+  shared_secrets: {}

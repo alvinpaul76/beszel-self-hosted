@@ -103,7 +103,8 @@ This section is the one place that explains the Infisical setup. Other pages lin
 
 **Good to know:**
 - Changed a secret in Infisical? Run `docker compose restart beszel-agent`. The agent reads its secrets only when it starts.
-- If Infisical is down, the agent starts from the last copy that was fetched. That copy is stored in the Docker volume `shared_secrets`. Avoid `docker compose down -v`, which deletes it.
+- If Infisical is down, the agent starts from the last copy that was fetched. That copy is stored in the Docker volume `<project>_shared_secrets` (for example `agent_shared_secrets`). Avoid `docker compose down -v`, which deletes it.
+- Other Docker stacks on the same server can run their own `infisical-agent` helper. Each stack keeps its own helper, machine identity and volume, so one stack cannot read another's secrets. The helper has no fixed container name, so the names do not clash (Compose calls this one `agent-infisical-agent-1`). Use the service name in commands, such as `docker compose logs infisical-agent`.
 - Running the Infisical CLI at the repo root is optional. If you do, copy `.infisical.example.yaml` to `.infisical.yaml` and set your project ID.
 
 ### Port Configuration
