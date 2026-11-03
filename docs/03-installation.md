@@ -231,6 +231,19 @@ cd agent
 docker compose up -d
 ```
 
+The agent fetches its secrets (`BESZEL_AGENT_KEY`, `BESZEL_AGENT_TOKEN`) from Infisical through a sidecar container. Before the first start, create the local config files from the examples and fill in your own values:
+
+```bash
+cd agent
+cp .env.agent.example .env.agent && chmod 600 .env.agent       # machine identity client ID/secret
+cp infisical/agent-config.example.yaml infisical/agent-config.yaml   # set your Infisical address
+cp infisical/templates/beszel-agent.example.tpl infisical/templates/beszel-agent.tpl   # set project ID and environment slug
+```
+
+Optionally, for the Infisical CLI at the repo root: `cp .infisical.example.yaml .infisical.yaml`.
+
+These files are in `.gitignore` because they hold values specific to your deployment.
+
 The `agent/` folder only includes the agent service, which is useful for:
 - Servers that don't need the hub
 - Reducing resource usage on agent servers

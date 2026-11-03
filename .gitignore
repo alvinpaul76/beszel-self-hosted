@@ -1,3 +1,9 @@
 .env
 .env.backup
 .env.agent
+
+# Deployment-specific Infisical config (copy from the *.example files)
+agent/infisical/agent-config.yaml
+agent/infisical/templates/*.tpl
+!agent/infisical/templates/*.example.tpl
+.infisical.yaml
