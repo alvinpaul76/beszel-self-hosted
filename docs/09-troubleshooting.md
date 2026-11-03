@@ -226,9 +226,22 @@ docker-compose restart beszel
 - Try: `curl http://hub-ip:8090` from the agent server
 
 **Check KEY and TOKEN:**
-- Verify they match what's shown in the hub
+- Verify the `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` secrets in Infisical match what's shown in the hub
 - Regenerate credentials from the hub if needed
 - Ensure no extra spaces or characters
+- After changing them in Infisical, run `docker compose restart beszel-agent`
+
+**Check the Infisical helper:**
+```bash
+cd agent
+docker compose ps
+docker compose logs infisical-agent
+```
+- `infisical-agent` must be healthy, or `beszel-agent` will not start
+- A login error usually means a wrong client ID or secret in `agent/.env.agent`
+- An error about a missing key means the secret name, project ID or environment slug is wrong in `agent/infisical/templates/beszel-agent.tpl`
+- If the compose file reports an unset variable, set `INFISICAL_CLI_IMAGE` in `agent/.env`
+- Setup steps: [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical)
 
 **Check if agent is running:**
 ```bash
@@ -263,7 +276,7 @@ docker-compose restart beszel-agent
 **Check if credentials changed:**
 - Some updates might require regenerating credentials
 - Get new KEY and TOKEN from the hub
-- Update `agent/.env`
+- Update the `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` secrets in Infisical
 - Restart the agent
 
 **Reconnect the agent:**

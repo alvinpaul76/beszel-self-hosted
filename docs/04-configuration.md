@@ -87,6 +87,7 @@ BESZEL_AGENT_PORT=45876
 BESZEL_AGENT_KEY=<put beszel agent key>
 BESZEL_AGENT_TOKEN=<put beszel agent token>
 BESZEL_AGENT_HUB_URL=http://localhost:8090
+INFISICAL_CLI_IMAGE=infisical/cli:<pin-version>
 ```
 
 **BESZEL_AGENT_IMAGE:** The Docker image for the agent. Keep as is unless using a custom version.
@@ -100,12 +101,19 @@ BESZEL_AGENT_HUB_URL=http://localhost:8090
 **BESZEL_AGENT_KEY:** A unique key that identifies this agent to the hub.
 - You get this from the hub web interface when adding a new agent
 - Each agent needs a unique key
+- Store it in Infisical. The compose file does not read this line in `agent/.env`; it is kept only for debugging.
 - Do not share this key publicly
 
 **BESZEL_AGENT_TOKEN:** A security token that authenticates the agent with the hub.
 - You get this from the hub web interface when adding a new agent
 - Each agent has its own token
+- Store it in Infisical. The compose file does not read this line in `agent/.env`; it is kept only for debugging.
 - Keep this secret
+
+**INFISICAL_CLI_IMAGE:** The Infisical CLI image for the helper container that fetches the KEY and TOKEN.
+- Set it to a specific version, such as `infisical/cli:<version>`. Do not use `latest`.
+- The compose file will not start if this is unset.
+- The rest of the Infisical setup is in [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical).
 
 **BESZEL_AGENT_HUB_URL:** The URL where the agent can reach the hub.
 - For hub and agent on the same server: `http://localhost:8090`
@@ -161,7 +169,7 @@ On the server where you want to run the agent:
 
 1. Install Beszel following the [Installation Guide](03-installation.md)
 2. Copy `agent/.env.example` to `agent/.env` and edit it
-3. Set the `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` from the hub
+3. Save the KEY and TOKEN from the hub as `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` in Infisical, and create the Infisical config files ([how](07-using-the-agent.md#connecting-the-agent-to-infisical))
 4. Set `BESZEL_AGENT_HUB_URL` to point to your hub
 5. Run `sudo ./create_volumes.sh agent`, then start the agent: `cd agent && docker compose up -d`
 
@@ -278,6 +286,8 @@ cd agent
 docker compose restart beszel-agent
 ```
 
+The same restart applies after you change `BESZEL_AGENT_KEY` or `BESZEL_AGENT_TOKEN` in Infisical. The agent reads them only when it starts.
+
 ## Backup Your Configuration
 
 It's a good idea to keep a backup of your `.env` files:
@@ -285,9 +295,10 @@ It's a good idea to keep a backup of your `.env` files:
 ```bash
 cp hub/.env hub/.env.backup
 cp agent/.env agent/.env.backup
+cp agent/.env.agent agent/.env.agent.backup
 ```
 
-You can also version control it with Git (but be careful not to commit sensitive values like keys and tokens).
+You can also version control it with Git (but be careful not to commit sensitive values like keys and tokens). The Infisical files with your own values (`agent/.env.agent`, `agent/infisical/agent-config.yaml`, `agent/infisical/templates/beszel-agent.tpl` and `.infisical.yaml`) are already in `.gitignore`. Only the `*.example` versions are committed.
 
 ## Common Configuration Scenarios
 
@@ -303,14 +314,14 @@ This is the simplest setup. Use the default settings:
 - On the hub server: Keep default settings, ensure firewall allows port 8090
 - On the agent server: Set `BESZEL_AGENT_HUB_URL=http://hub-server-ip:8090`
 - Ensure the agent server can reach the hub server's IP address
-- Copy the KEY and TOKEN from the hub to `agent/.env`
+- Save the KEY and TOKEN from the hub in Infisical (see [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical))
 
 ### Scenario 3: Multiple Agents, One Hub
 
 - Set up the hub once on your central server
 - For each agent server:
   - Install the agent
-  - Get a unique KEY and TOKEN from the hub for that agent
+  - Get a unique KEY and TOKEN from the hub for that agent and save them in that server's Infisical project or environment
   - Configure the agent to point to the hub
   - Start the agent
 - All agents will report to the same hub

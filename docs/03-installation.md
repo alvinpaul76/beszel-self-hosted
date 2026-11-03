@@ -192,14 +192,16 @@ Repeat the same installation steps as above on the agent server:
 1. Download the files
 2. Copy `agent/.env.example` to `agent/.env`
 3. Edit `agent/.env` with the agent details
+4. Save the KEY and TOKEN in Infisical and create the Infisical config files (see [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical))
 
 **Important Configuration for Agents:**
 
 When editing `agent/.env` on the agent server, make sure to:
 
-- Set `BESZEL_AGENT_KEY` to the key you got from the hub
-- Set `BESZEL_AGENT_TOKEN` to the token you got from the hub
 - Set `BESZEL_AGENT_HUB_URL` to the URL of your hub server
+- Set `INFISICAL_CLI_IMAGE` to a specific version of the Infisical CLI image
+
+The KEY and TOKEN you got from the hub are not stored in `agent/.env`. Save them as `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` in Infisical instead.
 
 For example, if your hub is at `192.168.1.100:8090`, set:
 ```
@@ -226,23 +228,14 @@ If you're setting up a server that will only run an agent (not the hub), use the
 
 ```bash
 cp agent/.env.example agent/.env
+# Create and fill in the Infisical config files first:
+# see "Connecting the Agent to Infisical" in 07-using-the-agent.md
 sudo ./create_volumes.sh agent
 cd agent
 docker compose up -d
 ```
 
-The agent fetches its secrets (`BESZEL_AGENT_KEY`, `BESZEL_AGENT_TOKEN`) from Infisical through a sidecar container. Before the first start, create the local config files from the examples and fill in your own values:
-
-```bash
-cd agent
-cp .env.agent.example .env.agent && chmod 600 .env.agent       # machine identity client ID/secret
-cp infisical/agent-config.example.yaml infisical/agent-config.yaml   # set your Infisical address
-cp infisical/templates/beszel-agent.example.tpl infisical/templates/beszel-agent.tpl   # set project ID and environment slug
-```
-
-Optionally, for the Infisical CLI at the repo root: `cp .infisical.example.yaml .infisical.yaml`.
-
-These files are in `.gitignore` because they hold values specific to your deployment.
+The agent gets its KEY and TOKEN from Infisical, so the Infisical config files must exist before the first start. The steps are in [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical).
 
 The `agent/` folder only includes the agent service, which is useful for:
 - Servers that don't need the hub

@@ -21,9 +21,10 @@ If you haven't installed the agent yet, follow the [Installation Guide](03-insta
 
 1. Download Beszel files to the server
 2. Copy `agent/.env.example` to `agent/.env`
-3. Edit `agent/.env` with your hub details
-4. Run `sudo ./create_volumes.sh agent`
-5. Start with `cd agent && docker compose up -d`
+3. Edit `agent/.env` with your hub URL and a pinned Infisical image version
+4. Create the Infisical config files and fill in your values (see [Connecting the Agent to Infisical](#connecting-the-agent-to-infisical))
+5. Run `sudo ./create_volumes.sh agent`
+6. Start with `cd agent && docker compose up -d`
 
 ### Agent-Only Installation
 
@@ -56,12 +57,54 @@ Each agent needs unique credentials from the hub:
 2. Go to the Agents section
 3. Click "Add New Agent"
 4. The hub will generate a KEY and TOKEN
-5. Copy these to `agent/.env`:
+5. Save them as two secrets in your Infisical project, named exactly `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN`
 
-```
-BESZEL_AGENT_KEY=your-unique-key
-BESZEL_AGENT_TOKEN=your-unique-token
-```
+The agent does not read the key and token from `agent/.env`. The compose file ignores the `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` lines in `agent/.env.example`, which are kept only for debugging. A helper container called `infisical-agent` fetches the two secrets from Infisical every time the stack starts.
+
+### Connecting the Agent to Infisical
+
+This section is the one place that explains the Infisical setup. Other pages link here.
+
+**Before you start, you need:**
+- An Infisical project that holds `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN`
+- A machine identity in Infisical that uses Universal Auth. Give it read-only access to that one project, environment and path.
+- A specific version of the Infisical CLI image, for example `infisical/cli:<version>`. Do not use `latest`, so a reboot or pull cannot change how the helper behaves.
+
+**Steps:**
+
+1. In `agent/.env`, set the image version:
+   ```
+   INFISICAL_CLI_IMAGE=infisical/cli:<version>
+   ```
+2. Create your local config files from the examples:
+   ```bash
+   cd agent
+   cp .env.agent.example .env.agent
+   chmod 600 .env.agent
+   cp infisical/agent-config.example.yaml infisical/agent-config.yaml
+   cp infisical/templates/beszel-agent.example.tpl infisical/templates/beszel-agent.tpl
+   ```
+3. Fill in each file:
+
+   | File | What to set |
+   |------|-------------|
+   | `agent/.env.agent` | `INFISICAL_UNIVERSAL_AUTH_CLIENT_ID` and `INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET` from your machine identity |
+   | `agent/infisical/agent-config.yaml` | `address`: the URL of your Infisical server |
+   | `agent/infisical/templates/beszel-agent.tpl` | Your Infisical project ID and environment slug (the short name of the environment, such as `prod`) |
+
+4. Start the agent from `agent/`:
+   ```bash
+   docker compose up -d
+   docker compose logs infisical-agent
+   ```
+   The logs should show a successful login. `docker compose ps` should show `infisical-agent` as healthy before `beszel-agent` starts.
+
+**Why the real files are not in Git:** the Infisical address, project ID and environment slug are specific to your deployment. The repository only contains the `*.example` files. The real files are listed in `.gitignore`, so your values are never committed. `.env.agent` holds the only secret left on disk, so keep it private.
+
+**Good to know:**
+- Changed a secret in Infisical? Run `docker compose restart beszel-agent`. The agent reads its secrets only when it starts.
+- If Infisical is down, the agent starts from the last copy that was fetched. That copy is stored in the Docker volume `shared_secrets`. Avoid `docker compose down -v`, which deletes it.
+- Running the Infisical CLI at the repo root is optional. If you do, copy `.infisical.example.yaml` to `.infisical.yaml` and set your project ID.
 
 ### Port Configuration
 
@@ -233,9 +276,10 @@ If you're concerned about resource usage:
 - Try accessing the hub from the agent: `curl http://hub-ip:8090`
 
 **Check the KEY and TOKEN:**
-- Verify they match what's in the hub
+- Verify the `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` secrets in Infisical match what's in the hub
 - Make sure there are no extra spaces or characters
-- Try generating new credentials from the hub
+- Try generating new credentials from the hub, update them in Infisical, then run `docker compose restart beszel-agent`
+- Run `docker compose logs infisical-agent`. The helper must be healthy, or the agent will not start.
 
 **Check network connectivity:**
 - Ensure the agent server can reach the hub server
