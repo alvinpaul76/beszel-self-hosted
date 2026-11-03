@@ -239,7 +239,7 @@ docker compose logs infisical-agent
 ```
 - `infisical-agent` must be healthy, or `beszel-agent` will not start
 - A login error usually means a wrong client ID or secret in `agent/.env.agent`
-- An error about a missing key means the secret name, project ID or environment slug is wrong in `agent/infisical/templates/beszel-agent.tpl`
+- An error about a missing key means the secret name, project ID or environment slug is wrong in Infisical or in `agent/.env.agent` (`INFISICAL_PROJECT_ID`, `INFISICAL_ENV`)
 - If the compose file reports an unset variable, set `INFISICAL_CLI_IMAGE` in `agent/.env`
 - A "Project with ID '<project-id>' not found" error means `beszel-agent.tpl` still holds the placeholders. Put in your real project ID and environment slug, then run `docker compose up -d`.
 - "Container name already in use" means a service sets a fixed `container_name` that another stack already uses. Remove that line from the compose file. Do not delete the other stack's container.

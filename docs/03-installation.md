@@ -192,7 +192,7 @@ Repeat the same installation steps as above on the agent server:
 1. Download the files
 2. Copy `agent/.env.example` to `agent/.env`
 3. Edit `agent/.env` with the agent details
-4. Save the KEY and TOKEN in Infisical and create the Infisical config files (see [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical))
+4. Save the KEY and TOKEN in Infisical and create `agent/.env.agent` (see [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical))
 
 **Important Configuration for Agents:**
 
@@ -228,14 +228,14 @@ If you're setting up a server that will only run an agent (not the hub), use the
 
 ```bash
 cp agent/.env.example agent/.env
-# Create and fill in the Infisical config files first:
+# Create and fill in agent/.env.agent first:
 # see "Connecting the Agent to Infisical" in 07-using-the-agent.md
 sudo ./create_volumes.sh agent
 cd agent
 docker compose up -d
 ```
 
-The agent gets its KEY and TOKEN from Infisical, so the Infisical config files must exist before the first start. The steps are in [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical).
+The agent gets its KEY and TOKEN from Infisical, so `agent/.env.agent` must exist before the first start. The steps are in [Connecting the Agent to Infisical](07-using-the-agent.md#connecting-the-agent-to-infisical).
 
 The `agent/` folder only includes the agent service, which is useful for:
 - Servers that don't need the hub

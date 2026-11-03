@@ -22,7 +22,7 @@ If you haven't installed the agent yet, follow the [Installation Guide](03-insta
 1. Download Beszel files to the server
 2. Copy `agent/.env.example` to `agent/.env`
 3. Edit `agent/.env` with your hub URL and a pinned Infisical image version
-4. Create the Infisical config files and fill in your values (see [Connecting the Agent to Infisical](#connecting-the-agent-to-infisical))
+4. Create `agent/.env.agent` with your Infisical credentials (see [Connecting the Agent to Infisical](#connecting-the-agent-to-infisical))
 5. Run `sudo ./create_volumes.sh agent`
 6. Start with `cd agent && docker compose up -d`
 
@@ -76,21 +76,21 @@ This section is the one place that explains the Infisical setup. Other pages lin
    ```
    INFISICAL_CLI_IMAGE=infisical/cli:<version>
    ```
-2. Create your local config files from the examples:
+2. Create your local credentials file from the example:
    ```bash
    cd agent
    cp .env.agent.example .env.agent
    chmod 600 .env.agent
-   cp infisical/agent-config.example.yaml infisical/agent-config.yaml
-   cp infisical/templates/beszel-agent.example.tpl infisical/templates/beszel-agent.tpl
    ```
-3. Fill in each file:
+3. Fill in `agent/.env.agent`. The agent config and template are committed and need no copy; the helper fills in your values at start.
 
-   | File | What to set |
+   | Variable | What to set |
    |------|-------------|
-   | `agent/.env.agent` | `INFISICAL_UNIVERSAL_AUTH_CLIENT_ID` and `INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET` from your machine identity |
-   | `agent/infisical/agent-config.yaml` | `address`: the URL of your Infisical server |
-   | `agent/infisical/templates/beszel-agent.tpl` | Your Infisical project ID and environment slug (the short name of the environment, such as `prod`) |
+   | `INFISICAL_UNIVERSAL_AUTH_CLIENT_ID` | Client ID of your machine identity |
+   | `INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET` | Client secret of your machine identity |
+   | `INFISICAL_ADDRESS` | URL of your Infisical server |
+   | `INFISICAL_PROJECT_ID` | Your Infisical project ID |
+   | `INFISICAL_ENV` | Environment slug (the short name of the environment, such as `prod`) |
 
 4. Start the agent from `agent/`:
    ```bash
@@ -99,13 +99,13 @@ This section is the one place that explains the Infisical setup. Other pages lin
    ```
    The logs should show a successful login. `docker compose ps` should show `infisical-agent` as healthy before `beszel-agent` starts.
 
-**Why the real files are not in Git:** the Infisical address, project ID and environment slug are specific to your deployment. The repository only contains the `*.example` files. The real files are listed in `.gitignore`, so your values are never committed. `.env.agent` holds the only secret left on disk, so keep it private.
+**Why only `.env.agent` is private:** the config and template in Git contain placeholders (`__INFISICAL_ADDRESS__`, `__INFISICAL_PROJECT_ID__`, `__INFISICAL_ENV__`). The helper replaces them with the values from `.env.agent` into temporary memory-backed files, so no deployment-specific value is in a tracked file. `.env.agent` holds the only secret left on disk and is in `.gitignore`, so keep it private.
 
 **Good to know:**
 - Changed a secret in Infisical? Run `docker compose restart beszel-agent`. The agent reads its secrets only when it starts.
 - If Infisical is down, the agent starts from the last copy that was fetched. That copy is stored in the Docker volume `<project>_shared_secrets` (for example `agent_shared_secrets`). Avoid `docker compose down -v`, which deletes it.
 - Other Docker stacks on the same server can run their own `infisical-agent` helper. Each stack keeps its own helper, machine identity and volume, so one stack cannot read another's secrets. The helper has no fixed container name, so the names do not clash (Compose calls this one `agent-infisical-agent-1`). Use the service name in commands, such as `docker compose logs infisical-agent`.
-- Running the Infisical CLI at the repo root is optional. If you do, copy `.infisical.example.yaml` to `.infisical.yaml` and set your project ID.
+- Running the Infisical CLI at the repo root is optional. The committed `.infisical.yaml` is only read by the host CLI.
 
 ### Port Configuration
 
