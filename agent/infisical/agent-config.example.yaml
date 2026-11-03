@@ -1,5 +1,5 @@
 infisical:
-  address: "https://secrets.bycre8orlab.com"
+  address: "https://<your-infisical-host>"
 
 auth:
   type: "universal-auth"

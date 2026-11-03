@@ -81,7 +81,7 @@ No. You only need one hub. Install agents on the servers you want to monitor, al
 2. Go to the Agents section
 3. Click "Add New Agent"
 4. Copy the KEY and TOKEN provided
-5. Install the agent on the new server using those credentials
+5. Save them in Infisical as `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN`, then install the agent on the new server ([setup steps](07-using-the-agent.md#connecting-the-agent-to-infisical))
 6. The server will appear in your hub once connected
 
 ### Can I monitor servers in different locations?
@@ -196,7 +196,7 @@ See the [Troubleshooting Guide](09-troubleshooting.md) for more help.
 ### My agent won't connect to the hub. What should I do?
 
 1. Verify the HUB_URL is correct in the `agent/.env`
-2. Check that the KEY and TOKEN match what's in the hub
+2. Check that the KEY and TOKEN secrets in Infisical match what's in the hub, and that `docker compose logs infisical-agent` shows no errors
 3. Test network connectivity from agent to hub
 4. Check firewall rules
 5. Review agent logs: `docker-compose logs beszel-agent`
