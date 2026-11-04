@@ -84,10 +84,10 @@ BESZEL_AGENT_IMAGE=henrygd/beszel-agent
 BESZEL_AGENT_CONTAINER_NAME=beszel-agent
 BESZEL_AGENT_RESTART=unless-stopped
 BESZEL_AGENT_PORT=45876
-BESZEL_AGENT_KEY=<put beszel agent key>
-BESZEL_AGENT_TOKEN=<put beszel agent token>
+BESZEL_AGENT_KEY=<put beszel agent key> # Moved to Infisical but kept for debugging purposes
+BESZEL_AGENT_TOKEN=<put beszel agent token> # Moved to Infisical but kept for debugging purposes
 BESZEL_AGENT_HUB_URL=http://localhost:8090
-INFISICAL_CLI_IMAGE=infisical/cli:<pin-version>
+INFISICAL_CLI_IMAGE=infisical/cli:0.44.8
 ```
 
 **BESZEL_AGENT_IMAGE:** The Docker image for the agent. Keep as is unless using a custom version.
@@ -169,7 +169,7 @@ On the server where you want to run the agent:
 
 1. Install Beszel following the [Installation Guide](03-installation.md)
 2. Copy `agent/.env.example` to `agent/.env` and edit it
-3. Save the KEY and TOKEN from the hub as `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` in Infisical, and create the Infisical config files ([how](07-using-the-agent.md#connecting-the-agent-to-infisical))
+3. Save the KEY and TOKEN from the hub as `BESZEL_AGENT_KEY` and `BESZEL_AGENT_TOKEN` in Infisical, and create `agent/.env.agent` ([how](07-using-the-agent.md#connecting-the-agent-to-infisical))
 4. Set `BESZEL_AGENT_HUB_URL` to point to your hub
 5. Run `sudo ./create_volumes.sh agent`, then start the agent: `cd agent && docker compose up -d`
 
@@ -298,7 +298,7 @@ cp agent/.env agent/.env.backup
 cp agent/.env.agent agent/.env.agent.backup
 ```
 
-You can also version control it with Git (but be careful not to commit sensitive values like keys and tokens). The Infisical files with your own values (`agent/.env.agent`, `agent/infisical/agent-config.yaml`, `agent/infisical/templates/beszel-agent.tpl` and `.infisical.yaml`) are already in `.gitignore`. Only the `*.example` versions are committed.
+You can also version control it with Git (but be careful not to commit sensitive values like keys and tokens). `agent/.env.agent` (your Infisical credentials, address, project ID and environment) is already in `.gitignore`. Only `agent/.env.agent.example` is committed. The Infisical config and template contain placeholders only.
 
 ## Common Configuration Scenarios
 

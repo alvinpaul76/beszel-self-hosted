@@ -1,4 +1,0 @@
-version: 1
-general: {}
-secrets-management:
-    project-id: <project-id>
