@@ -55,13 +55,13 @@ DEFAULT_STORAGE_FOLDER=/storage/beszel
 #### Hub Service Settings
 
 ```
-BESZEL_IMAGE=henrygd/beszel
+BESZEL_IMAGE=henrygd/beszel:0.21.1
 BESZEL_CONTAINER_NAME=beszel
 BESZEL_RESTART=unless-stopped
 BESZEL_PORT=8090
 ```
 
-**BESZEL_IMAGE:** The Docker image used for the hub. Generally, you should keep this as is unless you're using a custom version.
+**BESZEL_IMAGE:** The Docker image used for the hub. It is pinned to a specific version and is required; the compose file fails if it is unset. Change the tag deliberately when upgrading.
 
 **BESZEL_CONTAINER_NAME:** The name of the hub container. Keep this as is for consistency.
 
@@ -80,7 +80,7 @@ BESZEL_PORT=8090
 #### Agent Service Settings
 
 ```
-BESZEL_AGENT_IMAGE=henrygd/beszel-agent
+BESZEL_AGENT_IMAGE=henrygd/beszel-agent:0.21.1-alpine
 BESZEL_AGENT_CONTAINER_NAME=beszel-agent
 BESZEL_AGENT_RESTART=unless-stopped
 BESZEL_AGENT_PORT=45876
@@ -90,7 +90,7 @@ BESZEL_AGENT_HUB_URL=http://localhost:8090
 INFISICAL_CLI_IMAGE=infisical/cli:0.44.8
 ```
 
-**BESZEL_AGENT_IMAGE:** The Docker image for the agent. Keep as is unless using a custom version.
+**BESZEL_AGENT_IMAGE:** The Docker image for the agent, pinned to a specific version (required; the compose file fails if it is unset). Change the tag deliberately when upgrading.
 
 **BESZEL_AGENT_CONTAINER_NAME:** The name of the agent container. Keep as is.
 

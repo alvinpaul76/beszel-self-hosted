@@ -62,12 +62,12 @@ This is where Beszel will store its data. You can change this to any location on
 
 **Beszel Service Settings:**
 ```
-BESZEL_IMAGE=henrygd/beszel
+BESZEL_IMAGE=henrygd/beszel:0.21.1
 BESZEL_CONTAINER_NAME=beszel
 BESZEL_RESTART=unless-stopped
 BESZEL_PORT=8090
 ```
-- `BESZEL_IMAGE`: The Docker image to use (keep this as is)
+- `BESZEL_IMAGE`: The Docker image to use, pinned to a specific version (required)
 - `BESZEL_CONTAINER_NAME`: The name of the container (keep this as is)
 - `BESZEL_RESTART`: When to restart the container (keep "unless-stopped")
 - `BESZEL_PORT`: The port Beszel will use (8090 is the default, you can change if needed)

@@ -1,6 +1,6 @@
 services:
   beszel:
-    image: ${BESZEL_IMAGE}
+    image: ${BESZEL_IMAGE:?BESZEL_IMAGE is required}
     container_name: ${BESZEL_CONTAINER_NAME}
     restart: ${BESZEL_RESTART}
     ports:

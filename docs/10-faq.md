@@ -234,9 +234,10 @@ While technically possible, this is not recommended. A single hub can monitor ma
 ### How do I update Beszel?
 
 To update:
-1. Pull the latest Docker images: `docker-compose pull`
-2. Restart the services: `docker-compose up -d`
-3. Verify everything is working
+1. Set the new version tag in `BESZEL_IMAGE` (hub/.env) and `BESZEL_AGENT_IMAGE` (agent/.env); images are pinned, so `pull` alone won't upgrade
+2. Pull the images: `docker-compose pull`
+3. Restart the services: `docker-compose up -d`
+4. Verify everything is working
 
 Always backup before updating!
 
