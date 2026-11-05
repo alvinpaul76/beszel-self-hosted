@@ -43,7 +43,7 @@ services:
       start_period: 5s
 
   beszel-agent:
-    image: ${BESZEL_AGENT_IMAGE}
+    image: ${BESZEL_AGENT_IMAGE:?BESZEL_AGENT_IMAGE is required}
     container_name: ${BESZEL_AGENT_CONTAINER_NAME}
     restart: ${BESZEL_AGENT_RESTART}
     network_mode: host
